@@ -16,12 +16,13 @@ async function fetchChatCompletion({ queryKey }) {
         throw new Error("Please enter a valid artist, mood, or type")
     }
 
+    //gpt-3.5: 20 secs, turbo 16k-12 secs, gpt-4: 22+ seconds
     const chatCompletion = await openai.chat.completions.create({
         messages: [
             initialSystemInstructions,
             { role: "user", content: userInput },
         ],
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-16k",
         temperature: 1,
     });
 
