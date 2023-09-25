@@ -10,7 +10,7 @@ const openai = new OpenAI({
 })
 
 async function fetchChatCompletion({ queryKey }) {
-    const [gptres, userInput, setResponse, setUserInput] = queryKey
+    const [gptres, userInput, setResponse, setStreamResults] = queryKey
 
     if (userInput.trim().length === 0) {
         throw new Error("Please enter a valid artist, mood, or type")
@@ -19,12 +19,31 @@ async function fetchChatCompletion({ queryKey }) {
     //gpt-3.5: 20 secs, turbo 16k-12 secs, gpt-4: 22+ seconds
     const chatCompletion = await openai.chat.completions.create({
         messages: [
-            initialSystemInstructions,
+            initialSystemInstructions[0].playlist,
             { role: "user", content: userInput },
         ],
         model: "gpt-3.5-turbo-16k",
         temperature: 1,
     });
+
+    //gpt-3.5: 20 secs, turbo 16k-12 secs, gpt-4: 22+ seconds
+    const stream = await openai.chat.completions.create({
+        messages: [
+            initialSystemInstructions[1].message,
+            { role: "user", content: userInput },
+        ],
+        model: "gpt-3.5-turbo-16k",
+        temperature: 1,
+        stream: true,
+    });
+
+    for await (const chunk of stream) {
+        setStreamResults(
+            s => chunk.choices[0].delta.content === undefined
+                ? s
+                : s + chunk.choices[0].delta.content
+        )
+    }
 
     setResponse(JSON.parse(chatCompletion.choices[0].message.content))
     //const gptResponse = chatCompletion.choices[0].message.content
@@ -32,8 +51,8 @@ async function fetchChatCompletion({ queryKey }) {
     return chatCompletion
 }
 
-export default function useChatGPTResponse(userInput, setResponse, setUserInput) {
-    const gptQuery = useQuery(["gptResponse", userInput, setResponse, setUserInput], fetchChatCompletion, {
+export default function useChatGPTResponse(userInput, setResponse, setStreamResults) {
+    const gptQuery = useQuery(["gptResponse", userInput, setResponse, setStreamResults], fetchChatCompletion, {
         enabled: !!userInput,
         refetchOnWindowFocus: false
     })

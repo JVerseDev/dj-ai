@@ -1,5 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 
+function removeDuplicates(arr) {
+    let unique = [];
+    arr.forEach(element => {
+        const duplicate = unique.some(item => item.uriID === element.uriID);
+        console.log(duplicate)
+        if (!duplicate) {
+            unique.push(element);
+        }
+    });
+    return unique;
+}
+
 async function requestAccessToken() {
     const response = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
@@ -41,16 +53,20 @@ async function fetchSongs({ queryKey }) {
                 preview_song_url: item.tracks.items[0].preview_url,
                 album: {
                     name: item.tracks.items[0].album.name,
-                    img: {
-                        ...item.tracks.items[0].album.images[0]
-                    }
+                    img: { ...item.tracks.items[0].album.images[0] },
+                },
+                artist: {
+                    name: item.tracks.items[0].album.artists[0].name,
+                    url: item.tracks.items[0].album.artists[0].external_urls.spotify,
+                    uri: item.tracks.items[0].album.artists[0].uri
                 },
                 url: item.tracks.items[0].external_urls.spotify,
-                uri: item.tracks.items[0].uri
+                uri: item.tracks.items[0].uri,
+                uriID: item.tracks.items[0].id,
             }
         ))
 
-    setSpotifyResults(filteredData)
+    setSpotifyResults(removeDuplicates(filteredData))
 
     return filteredData
 }
