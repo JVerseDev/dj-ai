@@ -4,9 +4,10 @@ import querystring from 'querystring';
 //components
 import ChatInput from '../components/chat/ChatInput'
 import ChatList from '../components/chat/ChatList';
-//utils
+//utils and state
 import useChatGPTResponse from '../utils/useChatGPTResponse';
 import useSpotify from '../utils/useSpotify';
+import useChatReducer from '../state/useChatReducer';
 
 
 
@@ -17,16 +18,22 @@ const apiUrl = 'https://api.spotify.com/v1';
 const createPlaylistUrl = 'https://api.spotify.com/v1/me/playlists';
 
 function ChatContainer() {
-    const [userInput, setUserInput] = React.useState("")
-    const [gptResults, setGPTResults] = React.useState("")
-    const [streamResults, setStreamResults] = React.useState("")
-    const [spotifyResults, setSpotifyResults] = React.useState()
-    const gptQuery = useChatGPTResponse(userInput, setGPTResults, setStreamResults)
-    const spotifyQuery = useSpotify(gptResults.playlist, setSpotifyResults)
+    //state management
+    const [chatState, dispatch] = useChatReducer()
+    const userInput = chatState.length > 0 ? chatState[chatState.length - 1].userInput : ''
+    const gptPlaylist = chatState.length > 0 ? chatState[chatState.length - 1].songs.playlist : ''
+
+    //queries
+    const gptQuery = useChatGPTResponse(userInput, dispatch)
+    const spotifyQuery = useSpotify(gptPlaylist, dispatch)
     const [accessToken, setAccessToken] = React.useState('')
 
-
     React.useEffect(() => {
+        //local storage
+        const initialState = localStorage.getItem("chat") || []
+        dispatch({ type: "add", localStorage: initialState })
+
+        //access token
         const urlParams = new URLSearchParams(window.location.search);
         const authorizationCode = urlParams.get('code');
         if (authorizationCode) {
@@ -86,15 +93,12 @@ function ChatContainer() {
         return response
     }
 
-    spotifyResults && console.log(spotifyResults.map(item => item.uri))
-
-    /* TODO: remove the album name from gpt response and pull that from spotify instead */
     /* TODO: Add in recommendations from chat gpt onto spotify to create a mix */
 
     return (
         <div className="chat-container flex flex-col w-full h-full relative">
-            <ChatList gptQuery={gptQuery} spotifyQuery={spotifyQuery} gptResults={gptResults} spotifyResults={spotifyResults} streamResults={streamResults} />
-            <ChatInput setUserInput={setUserInput} setStreamResults={setStreamResults} />
+            <ChatList chatState={chatState} gptQuery={gptQuery} spotifyQuery={spotifyQuery} />
+            <ChatInput dispatch={dispatch} />
 
         </div >
     );

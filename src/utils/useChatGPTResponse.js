@@ -9,12 +9,15 @@ const openai = new OpenAI({
     dangerouslyAllowBrowser: true
 })
 
+//TODO: Break this up into several fucntions
 async function fetchChatCompletion({ queryKey }) {
-    const [gptres, userInput, setResponse, setStreamResults] = queryKey
+    const [gptres, userInput, dispatch] = queryKey
 
     if (userInput.trim().length === 0) {
         throw new Error("Please enter a valid artist, mood, or type")
     }
+
+    console.log("gpt fired")
 
     //gpt-3.5: 20 secs, turbo 16k-12 secs, gpt-4: 22+ seconds
     const chatCompletion = await openai.chat.completions.create({
@@ -26,7 +29,6 @@ async function fetchChatCompletion({ queryKey }) {
         temperature: 1,
     });
 
-    //gpt-3.5: 20 secs, turbo 16k-12 secs, gpt-4: 22+ seconds
     const stream = await openai.chat.completions.create({
         messages: [
             initialSystemInstructions[1].message,
@@ -37,26 +39,21 @@ async function fetchChatCompletion({ queryKey }) {
         stream: true,
     });
 
+    //updates state as gpt streams...
     for await (const chunk of stream) {
-        setStreamResults(
-            s => chunk.choices[0].delta.content === undefined
-                ? s
-                : s + chunk.choices[0].delta.content
-        )
+        dispatch({ type: "update", key: "message", value: (chunk.choices[0].delta.content !== undefined && chunk.choices[0].delta.content) })
     }
 
-    setResponse(JSON.parse(chatCompletion.choices[0].message.content))
-    //const gptResponse = chatCompletion.choices[0].message.content
+    dispatch({ type: "update", key: "songs", value: JSON.parse(chatCompletion.choices[0].message.content) })
 
     return chatCompletion
 }
 
-export default function useChatGPTResponse(userInput, setResponse, setStreamResults) {
-    const gptQuery = useQuery(["gptResponse", userInput, setResponse, setStreamResults], fetchChatCompletion, {
+export default function useChatGPTResponse(userInput, dispatch) {
+    const gptQuery = useQuery(["gptResponse", userInput, dispatch], fetchChatCompletion, {
         enabled: !!userInput,
         refetchOnWindowFocus: false
     })
-    //openai is our fetch request, it returns a promise
 
     return gptQuery
 

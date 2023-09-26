@@ -1,15 +1,16 @@
 import React from 'react';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, RadioGroup, Radio } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 
 function AIChatItem({ spotifyResults, streamResults }) {
     const [selectedSong, setSelectedSong] = React.useState('');
 
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
         spotifyResults && setSelectedSong(spotifyResults[0].uriID)
     }, [spotifyResults])
 
     return (
-        <div>
+        //TODO: only in the last ref do you do the animation
+        <div className='bg-slate-300 p-4'>
             <iframe className='h-20 w-full mt-4' src={`https://open.spotify.com/embed/track/${selectedSong}?utm_source=generator`} width="100%" height="352" allowFullScreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
             <Table
                 color="primary"

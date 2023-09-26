@@ -1,0 +1,28 @@
+.animated-component {
+    /* or inline-flex */
+    /* Move the element up by 20px */
+    transition: height 0.5s ease, transform 0.5s ease;
+    animation: fadeInUp 1s ease forwards;
+    /* CSS animation */
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animated-seba-component {
+    opacity: 0;
+    transform: translateY(20px);
+    /* Move the element up by 20px */
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    animation: fadeInUp 1s ease forwards;
+    animation-delay: 1s;
+}

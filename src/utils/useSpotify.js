@@ -27,7 +27,7 @@ async function requestAccessToken() {
 
 async function fetchSongs({ queryKey }) {
     console.log('fetching songs from Spotify...')
-    const [songsList, playlist, setSpotifyResults] = queryKey
+    const [songsList, playlist, dispatch] = queryKey
     const { access_token } = await requestAccessToken()
 
     //searches through the spotify tracks catalog using the track and artist name as filters
@@ -66,13 +66,13 @@ async function fetchSongs({ queryKey }) {
             }
         ))
 
-    setSpotifyResults(removeDuplicates(filteredData))
+    dispatch({ type: "update", key: "spotify", value: removeDuplicates(filteredData) })
 
     return filteredData
 }
 
-export default function useSpotify(playlist, setSpotifyResults) {
-    const spotifyQuery = useQuery(["songsList", playlist, setSpotifyResults], fetchSongs,
+export default function useSpotify(playlist, dispatch) {
+    const spotifyQuery = useQuery(["songsList", playlist, dispatch], fetchSongs,
         {
             enabled: !!playlist,
             refetchOnWindowFocus: false

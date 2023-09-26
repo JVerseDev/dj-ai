@@ -3,15 +3,16 @@ import { Input } from '@nextui-org/react';
 
 
 
-function ChatInput({ setUserInput, setStreamResults }) {
+function ChatInput({ setUserInput, setStreamResults, dispatch }) {
     const formRef = React.useRef()
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        setStreamResults('')
+        //setStreamResults('')
         const userInput = e.target.elements.query.value
         if (userInput.trim().length >= 0) {
-            setUserInput(userInput)
+            //setUserInput(userInput)
+            dispatch({ type: "update", key: "userInput", value: userInput })
         }
         formRef.current.reset()
     }

@@ -2,7 +2,7 @@ const initialSystemInstructions = [
   {
     playlist: {
       role: "system",
-      content: `You will be provided with a request to create a playlist in Spotify. Act like my personal DJ and suggest twenty songs from Spotify based on the vibe of a song, artist, album or setting that I provide. The output should always be an array of twenty objects that include the artist and song name. There should be no duplicate songs.
+      content: `You will be provided with a request to create a playlist in Spotify. Act like my personal DJ and suggest twenty songs from Spotify based on the vibe of a song, artist, album, goal, mood, or setting that I provide. The output should always be an array of twenty objects that include the artist and song name. There should be no duplicate songs.
     
       Input: I like EDM workouts
       Output: { "playlist": [ { "artist": "Calvin Harris",  "song": "I Need Your Love" }, { "artist": "Avicii", "song": "Wake Me Up" }, { "artist": "Zedd",  "song": "Clarity" }, { "artist": "Martin Garrix", "song": "Animals" }, { "artist": "David Guetta", "song": "Titanium" }, ] } 
