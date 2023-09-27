@@ -11,7 +11,7 @@ const openai = new OpenAI({
 
 //TODO: Break this up into several fucntions
 async function fetchChatCompletion({ queryKey }) {
-    const [gptres, userInput, dispatch] = queryKey
+    const [gptres, userInput, dispatch, setGPTPlaylist] = queryKey
 
     if (userInput.trim().length === 0) {
         throw new Error("Please enter a valid artist, mood, or type")
@@ -41,16 +41,17 @@ async function fetchChatCompletion({ queryKey }) {
 
     //updates state as gpt streams...
     for await (const chunk of stream) {
-        dispatch({ type: "update", key: "message", value: (chunk.choices[0].delta.content !== undefined && chunk.choices[0].delta.content) })
+        dispatch({ type: "updateMessage", key: "message", value: (chunk.choices[0].delta.content !== undefined && chunk.choices[0].delta.content) })
     }
 
-    dispatch({ type: "update", key: "songs", value: JSON.parse(chatCompletion.choices[0].message.content) })
+    dispatch({ type: "updatePlaylist", key: "songs", value: JSON.parse(chatCompletion.choices[0].message.content) })
+    setGPTPlaylist(JSON.parse(chatCompletion.choices[0].message.content))
 
     return chatCompletion
 }
 
-export default function useChatGPTResponse(userInput, dispatch) {
-    const gptQuery = useQuery(["gptResponse", userInput, dispatch], fetchChatCompletion, {
+export default function useChatGPTResponse(userInput, dispatch, setGPTPlaylist) {
+    const gptQuery = useQuery(["gptResponse", userInput, dispatch, setGPTPlaylist], fetchChatCompletion, {
         enabled: !!userInput,
         refetchOnWindowFocus: false
     })

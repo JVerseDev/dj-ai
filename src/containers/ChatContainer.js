@@ -20,20 +20,21 @@ const createPlaylistUrl = 'https://api.spotify.com/v1/me/playlists';
 function ChatContainer() {
     //state management
     const [chatState, dispatch] = useChatReducer()
-    const userInput = chatState.length > 0 ? chatState[chatState.length - 1].userInput : ''
-    const gptPlaylist = chatState.length > 0 ? chatState[chatState.length - 1].songs.playlist : ''
+    const [sessionInput, setSessionInput] = React.useState('')
+    const [gptPlaylist, setGPTPlaylist] = React.useState('')
 
+    console.log(gptPlaylist)
     //queries
-    const gptQuery = useChatGPTResponse(userInput, dispatch)
-    const spotifyQuery = useSpotify(gptPlaylist, dispatch)
+    const gptQuery = useChatGPTResponse(sessionInput, dispatch, setGPTPlaylist)
+    const spotifyQuery = useSpotify(gptPlaylist.playlist, dispatch)
     const [accessToken, setAccessToken] = React.useState('')
 
     React.useEffect(() => {
-        //local storage
-        const initialState = localStorage.getItem("chat") || []
-        dispatch({ type: "add", localStorage: initialState })
+        //localStorage
+        const localChats = localStorage.getItem("chat") || "[]"
+        dispatch({ type: "initialRender", localStorage: JSON.parse(localChats) })
 
-        //access token
+        //accessToken
         const urlParams = new URLSearchParams(window.location.search);
         const authorizationCode = urlParams.get('code');
         if (authorizationCode) {
@@ -93,12 +94,13 @@ function ChatContainer() {
         return response
     }
 
+
     /* TODO: Add in recommendations from chat gpt onto spotify to create a mix */
 
     return (
         <div className="chat-container flex flex-col w-full h-full relative">
             <ChatList chatState={chatState} gptQuery={gptQuery} spotifyQuery={spotifyQuery} />
-            <ChatInput dispatch={dispatch} />
+            <ChatInput dispatch={dispatch} setSessionInput={setSessionInput} />
 
         </div >
     );

@@ -66,7 +66,7 @@ async function fetchSongs({ queryKey }) {
             }
         ))
 
-    dispatch({ type: "update", key: "spotify", value: removeDuplicates(filteredData) })
+    dispatch({ type: "updatePlaylist", key: "spotify", value: removeDuplicates(filteredData) })
 
     return filteredData
 }

@@ -5,32 +5,33 @@ const initialState = [
 ]
 
 function reducer(state, action) {
-    console.log("use reducer fires")
     switch (action.type) {
+        case "initialRender":
+            return action.localStorage
         case "add":
-            //The main problem is that the user input and gpt playlist results will be populated if we save user results onto local storage or db. Unless you create a new blank template when spotify finishes loading? What if there's a server error after user sends input?
-            //what if you "add" is only envoked during the intial render? You insert all of the existing getstorage, and you just need update message and playlist. localStorage.setItem only when updating
-
-
-            console.log(action.localStorage)
             const newState = [
-                ...action.localStorage,
+                ...state,
                 {
                     id: new Date(),
-                    userInput: "",
-                    message: "",
-                    songs: "",
-                    spotify: "",
+                    userInput: action.userInput,
+                    seba: {
+                        message: "",
+                        songs: "",
+                        spotify: "",
+                    }
                 }
             ]
-            console.log(newState)
+            localStorage.setItem("chat", JSON.stringify(newState))
             return newState
-        case "update":
+        case "updatePlaylist":
             const playlist = state.map((item, index) => (
                 index === state.length - 1
                     ? {
                         ...item,
-                        [action.key]: action.value,
+                        seba: {
+                            ...item.seba,
+                            [action.key]: action.value,
+                        }
                     }
                     : item
             ))
@@ -41,7 +42,10 @@ function reducer(state, action) {
                 index === state.length - 1
                     ? {
                         ...item,
-                        message: item.message + action.value,
+                        seba: {
+                            ...item.seba,
+                            [action.key]: item.seba[action.key] + action.value,
+                        }
                     }
                     : item
             ))
