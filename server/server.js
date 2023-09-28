@@ -16,12 +16,6 @@ const redirectUri = 'http://localhost:3001/callback';
 const apiUrl = 'https://api.spotify.com/v1';
 const createPlaylistUrl = `${apiUrl}/me/playlists`;
 
-app.get('/hello', (req, res) => {
-    console.log('working')
-    const code = req.query.code;
-    res.send(`this is another test`);
-});
-
 app.get('/callback', async (req, res) => {
     //req.params.id /:id
     const code = req.query.code;
@@ -55,6 +49,7 @@ async function requestAccessToken(code) {
         body: params
     }).then(res => res.json());
 
+    console.log(result)
 
     return result
 }
