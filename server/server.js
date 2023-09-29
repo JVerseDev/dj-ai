@@ -22,8 +22,9 @@ app.get('/callback', async (req, res) => {
     console.log('hello')
 
     const tokenResponse = await requestAccessToken(code);
+
     console.log(tokenResponse)
-    const accessToken = tokenResponse.access_token;
+    const accessToken = tokenResponse;
 
     res.send(accessToken);
 });
@@ -50,6 +51,34 @@ async function requestAccessToken(code) {
     }).then(res => res.json());
 
     console.log(result)
+
+    return result
+}
+
+const refreshAccessToken = (refreshToken) => {
+    // Make a POST request to the token endpoint of the authorization server
+    const result = fetch('https://api.example.com/token', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}`,
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error('Failed to refresh access token');
+            }
+            return response.json();
+        })
+        .then((data) => {
+            // The response should contain a new access token
+            const newAccessToken = data.access_token;
+            // You can use the new access token to make authenticated API requests
+            console.log('New Access Token:', newAccessToken);
+        })
+        .catch((error) => {
+            console.error('Error refreshing access token:', error);
+        });
 
     return result
 }

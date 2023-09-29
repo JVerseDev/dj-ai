@@ -15,24 +15,22 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
 
     }, [chatState])
 
-    console.log(accessToken)
-
 
     /* TODO: LOADING*/
     /* Turn the 3 into a component */
     return (
-        <div ref={chatListRef} className="chat-list h-full flex flex-col items-center bg-[#121212] pb-32 overflow-auto">
+        <div ref={chatListRef} className="chat-list h-full flex flex-col items-center pb-32 overflow-auto">
             {chatState.map((chatItem, index) => (
                 <div key={index} className='flex flex-col items-end'>
                     {chatItem.userInput &&
-                        <div className={`w-auto max-w-[640px] p-4 bg-[#5E5E5E] text-white mt-8 rounded-3xl ${index === chatState.length - 1 && 'animated-component'}`}>
+                        <div className={`w-auto max-w-[640px] p-4 text-white mt-8 rounded-3xl ${index === chatState.length - 1 && 'animated-component'}`}>
                             {chatItem.userInput}
                         </div>
                     }
 
                     {gptQuery.isLoading && gptQuery.fetchStatus === "idle" && chatItem.seba.message === ''
                         ? null
-                        : <div className={`w-[640px] p-4 bg-[#232323] mt-8 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
+                        : <div className={`w-[640px] p-4 bg-[#242424] mt-8 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
                             {gptQuery.isLoading && chatItem.seba.message === ''
                                 ? <p>Your Personal DJ at Work....</p>
                                 : chatItem.seba.message
@@ -41,8 +39,22 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
                     }
 
                     {chatItem.seba.spotify &&
-                        <div className={`w-[640px] p-4 bg-[#232323] mt-4 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
-                            {accessToken ? <Button onClick={() => handleAddPlaylist(chatItem.seba.spotify.map(song => song.uri))}></Button> : <Button onClick={handleAuthorization}>Connect to Spotify</Button>}
+                        <div className={`w-[640px] p-4 bg-[#242424] mt-4 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
+                            {accessToken
+                                ? <Button
+                                    isDisabled={chatItem.playlistID ? true : false}
+                                    onClick={() => handleAddPlaylist(
+                                        {
+                                            playlist: chatItem.seba.spotify.map(song => song.uri),
+                                            selectedID: chatItem.id
+                                        }
+                                    )}>
+                                    {chatItem.playlistID ? 'Playlist Added ✓' : 'Add to Playlist'}
+                                </Button>
+                                : <Button
+                                    onClick={handleAuthorization}>
+                                    Connect to Spotify
+                                </Button>}
 
                             {index === chatItem.length - 1
                                 ? spotifyQuery.isLoading && spotifyQuery.fetchStatus === "idle"

@@ -18,7 +18,7 @@ function ChatInput({ setSessionInput, dispatch }) {
     }
 
     return (
-        <div className="chat-input absolute bottom-0 py-8 px-16 w-full bg-black">
+        <div className="chat-input absolute bottom-0 py-8 px-16 w-full bg-inherit">
             <form onSubmit={handleSubmit} ref={formRef}>
                 <Input className='' name="query" />
             </form>

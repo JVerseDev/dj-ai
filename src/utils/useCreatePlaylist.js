@@ -2,7 +2,8 @@ import React from "react"
 import { useQuery } from "@tanstack/react-query"
 
 async function createPlaylist({ queryKey }) {
-    const [playlistId, accessToken, playlistToAdd, setPlaylistToAdd] = queryKey
+    const [playlistId, accessToken, playlistToAdd, setPlaylistToAdd, dispatch] = queryKey
+    const { playlist, selectedID } = playlistToAdd
     //gets user id
     const userResponse = await fetch('https://api.spotify.com/v1/me', {
         method: 'GET',
@@ -38,20 +39,22 @@ async function createPlaylist({ queryKey }) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            uris: playlistToAdd
+            uris: playlist
             ,
             position: 0
         }),
     }).then(res => res.json())
     console.log(addResponse)
 
+    dispatch({ type: "addPlaylistID", selectedID: selectedID, playlistID: playlist_id })
     setPlaylistToAdd('')
 
     return addResponse
 }
 
-export default function useCreatePlaylist(accessToken, playlistToAdd, setPlaylistToAdd) {
-    const playlistQuery = useQuery(["playlist_id", accessToken, playlistToAdd, setPlaylistToAdd], createPlaylist, {
+/* TODO: //dispatch({type: "addPlaylistID", selectedID: selectedID, playlistID: playlistID}) */
+export default function useCreatePlaylist(accessToken, playlistToAdd, setPlaylistToAdd, dispatch) {
+    const playlistQuery = useQuery(["playlist_id", accessToken, playlistToAdd, setPlaylistToAdd, dispatch], createPlaylist, {
         enabled: !!accessToken && !!playlistToAdd,
     })
     return playlistQuery

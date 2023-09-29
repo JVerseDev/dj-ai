@@ -13,6 +13,7 @@ function reducer(state, action) {
                 ...state,
                 {
                     id: new Date(),
+                    playlistID: '',
                     userInput: action.userInput,
                     seba: {
                         message: "",
@@ -51,6 +52,17 @@ function reducer(state, action) {
             ))
             localStorage.setItem("chat", JSON.stringify(message))
             return message
+        case "addPlaylistID":
+            const spotifyPlaylistCreated = state.map((item) => (
+                item.id === action.selectedID
+                    ? {
+                        ...item,
+                        playlistID: action.playlistID
+                    }
+                    : item
+            ))
+            localStorage.setItem("chat", JSON.stringify(spotifyPlaylistCreated))
+            return spotifyPlaylistCreated
     }
 
 }
