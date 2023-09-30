@@ -8,7 +8,7 @@ import useChatGPTResponse from '../utils/useChatGPTResponse';
 import useSpotify from '../utils/useSpotify';
 import useCreatePlaylist from '../utils/useCreatePlaylist';
 
-function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chatState, dispatch }) {
+function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chatState, dispatch, setSelectedPlaylist, setPlaylistBarIsOpen }) {
     //state management
     const [sessionInput, setSessionInput] = React.useState('')
     const [gptPlaylist, setGPTPlaylist] = React.useState('')
@@ -24,9 +24,8 @@ function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chat
         dispatch({ type: "initialRender", localStorage: JSON.parse(localChats) })
     }, [])
 
-    //include add playlist here
+    //TODO: When setPlaylistToAdd state changes, refetch the user's collection of playlists
     const handleAddPlaylist = (playlistObj) => {
-        //turn this into an object that includes the playlist and also the selectedID
         setPlaylistToAdd(playlistObj)
     }
 
@@ -34,8 +33,20 @@ function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chat
 
     return (
         <div className="chat-container flex flex-col w-full h-full relative bg-[#121212] overflow-hidden rounded-2xl">
-            <ChatList chatState={chatState} gptQuery={gptQuery} spotifyQuery={spotifyQuery} setSelectedSong={setSelectedSong} handleAuthorization={handleAuthorization} handleAddPlaylist={handleAddPlaylist} accessToken={accessToken} />
-            <ChatInput dispatch={dispatch} setSessionInput={setSessionInput} />
+            <ChatList
+                chatState={chatState}
+                gptQuery={gptQuery}
+                spotifyQuery={spotifyQuery}
+                setSelectedSong={setSelectedSong}
+                handleAuthorization={handleAuthorization}
+                handleAddPlaylist={handleAddPlaylist}
+                accessToken={accessToken}
+                setSelectedPlaylist={setSelectedPlaylist}
+                setPlaylistBarIsOpen={setPlaylistBarIsOpen} />
+            <ChatInput
+                dispatch={dispatch}
+                setSessionInput={setSessionInput}
+            />
 
         </div >
     );

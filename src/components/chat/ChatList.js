@@ -4,7 +4,7 @@ import './animation.css'
 import { Button } from '@nextui-org/react';
 
 
-function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAuthorization, handleAddPlaylist, accessToken }) {
+function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAuthorization, handleAddPlaylist, accessToken, setSelectedPlaylist, setPlaylistBarIsOpen }) {
     //create a hook for this? take in an array and return an array
     const chatListRef = React.useRef(null)
 
@@ -16,8 +16,8 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
     }, [chatState])
 
 
-    /* TODO: LOADING*/
-    /* Turn the 3 into a component */
+    /* TODO: LOADING animation*/
+    /* TODO: Refactor this entire thing, it's so hard to read. Separate into different components */
     return (
         <div ref={chatListRef} className="chat-list h-full flex flex-col items-center pb-32 overflow-auto">
             {chatState.map((chatItem, index) => (
@@ -41,16 +41,29 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
                     {chatItem.seba.spotify &&
                         <div className={`w-[640px] p-4 bg-[#242424] mt-4 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
                             {accessToken
-                                ? <Button
-                                    isDisabled={chatItem.playlistID ? true : false}
-                                    onClick={() => handleAddPlaylist(
-                                        {
-                                            playlist: chatItem.seba.spotify.map(song => song.uri),
-                                            selectedID: chatItem.id
-                                        }
-                                    )}>
-                                    {chatItem.playlistID ? 'Playlist Added ✓' : 'Add to Playlist'}
-                                </Button>
+                                ? <div>
+                                    <Button
+                                        isDisabled={chatItem.playlistID ? true : false}
+                                        onClick={() => handleAddPlaylist(
+                                            {
+                                                playlist: chatItem.seba.spotify.map(song => song.uri),
+                                                selectedID: chatItem.id
+                                            }
+                                        )}>
+                                        {chatItem.playlistID ? 'Playlist Added ✓' : 'Add to Playlist'}
+                                    </Button>
+                                    {chatItem.playlistID
+                                        ? <Button
+                                            onClick={() => {
+                                                setPlaylistBarIsOpen(true)
+                                                setSelectedPlaylist(chatItem.playlistID)
+                                            }}
+                                        >
+                                            View Playlist
+                                        </Button>
+                                        : null}
+
+                                </div>
                                 : <Button
                                     onClick={handleAuthorization}>
                                     Connect to Spotify

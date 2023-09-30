@@ -39,8 +39,7 @@ async function createPlaylist({ queryKey }) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            uris: playlist
-            ,
+            uris: playlist,
             position: 0
         }),
     }).then(res => res.json())
@@ -52,7 +51,6 @@ async function createPlaylist({ queryKey }) {
     return addResponse
 }
 
-/* TODO: //dispatch({type: "addPlaylistID", selectedID: selectedID, playlistID: playlistID}) */
 export default function useCreatePlaylist(accessToken, playlistToAdd, setPlaylistToAdd, dispatch) {
     const playlistQuery = useQuery(["playlist_id", accessToken, playlistToAdd, setPlaylistToAdd, dispatch], createPlaylist, {
         enabled: !!accessToken && !!playlistToAdd,

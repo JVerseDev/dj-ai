@@ -41,7 +41,7 @@ async function fetchChatCompletion({ queryKey }) {
 
     //updates state as gpt streams...
     for await (const chunk of stream) {
-        dispatch({ type: "updateMessage", key: "message", value: (chunk.choices[0].delta.content !== undefined && chunk.choices[0].delta.content) })
+        dispatch({ type: "updateMessage", key: "message", value: (chunk.choices[0].delta.content !== undefined ? chunk.choices[0].delta.content : '') })
     }
 
     dispatch({ type: "updatePlaylist", key: "songs", value: JSON.parse(chatCompletion.choices[0].message.content) })

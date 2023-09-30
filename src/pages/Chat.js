@@ -4,6 +4,7 @@ import SideBar from "../containers/SideBar";
 import querystring from 'querystring';
 import useChatReducer from "../state/useChatReducer";
 import PlaylistBar from "../containers/PlaylistBar";
+import PlaylistContainer from "../containers/PlaylistContainer"
 
 const clientId = '6b42d12ccbbe4a67837f46ba132701db';
 const redirectUri = 'http://localhost:3000/callback';
@@ -11,14 +12,16 @@ const redirectUri = 'http://localhost:3000/callback';
 function Chat() {
     const [chatState, dispatch] = useChatReducer()
     const [selectedSong, setSelectedSong] = React.useState('');
+    const [selectedPlaylist, setSelectedPlaylist] = React.useState('')
     const [accessToken, setAccessToken] = React.useState('')
-    //TODO: Create playlist reducer. How about for public and private? Do I need to do anything for this?
+    //TODO: Create playlist reducer. How about for public and private? Do I need to do anything for this? {selectedPlaylist, togglePlaylistBar, all of users's playlist, filtered playlist}
     const [userPlaylist, setUserPlaylist] = React.useState('')
-    const [playlistBarIsOpen, setPlaylistBarIsOpen] = React.useState(true)
+    const [playlistBarIsOpen, setPlaylistBarIsOpen] = React.useState(false)
     const filteredCreatedPlaylists = chatState.map(item => item.playlistID).filter(item => !!item)
-    console.log(filteredCreatedPlaylists)
+    const spotifyAIPlaylist = userPlaylist ? userPlaylist.items.filter((item) => (
+        filteredCreatedPlaylists.includes(item.id)
+    )) : null
 
-    //console.log(`accessToken is: ${accessToken}`)
 
     React.useEffect(() => {
         //accessToken
@@ -29,10 +32,10 @@ function Chat() {
                 const response = await fetch(`http://localhost:3001/callback?code=${authorizationCode}`)
                 const data = await response.json()
                 //because of React.Strict mode, it's causing the data to return blank a second time. need conditional
-                if (data.access_token) {
-                    setAccessToken(data.access_token)
-                    localStorage.setItem("accessToken", JSON.stringify(data))
-                }
+                if (!data.access_token) return
+
+                setAccessToken(data.access_token)
+                localStorage.setItem("accessToken", JSON.stringify(data))
 
                 return data
             }
@@ -40,8 +43,8 @@ function Chat() {
         }
     }, [])
 
+    //TODO: What happens when a user deletes a playlist in spotify? How do we do error checking?
     React.useEffect(() => {
-
         if (accessToken) {
             //put this into a useQuery hook
             const handleGetPlaylists = async () => {
@@ -52,9 +55,7 @@ function Chat() {
                         'Content-Type': 'application/json',
                     },
                 }).then(res => res.json())
-                setUserPlaylist(userResponse.items.filter((item) => (
-                    filteredCreatedPlaylists.includes(item.id)
-                )))
+                setUserPlaylist(userResponse)
             }
             handleGetPlaylists()
         }
@@ -76,12 +77,32 @@ function Chat() {
     };
 
 
+    //consider moving side bar into a higher component?
+    //<PlaylistContainer selectedPlaylist={selectedPlaylist} />
     return (
         <div className="chat-page flex flex-row w-full h-full bg-black py-4 px-2">
-            <SideBar selectedSong={selectedSong} handleAuthorization={handleAuthorization} userPlaylist={userPlaylist} filteredCreatedPlaylists={filteredCreatedPlaylists} />
-            <ChatContainer setSelectedSong={setSelectedSong} handleAuthorization={handleAuthorization} accessToken={accessToken} chatState={chatState} dispatch={dispatch} />
+            <SideBar
+                selectedSong={selectedSong}
+                handleAuthorization={handleAuthorization}
+                spotifyAIPlaylist={spotifyAIPlaylist}
+                userPlaylist={userPlaylist.items}
+                filteredCreatedPlaylists={filteredCreatedPlaylists}
+            />
+            <ChatContainer
+                setSelectedSong={setSelectedSong}
+                handleAuthorization={handleAuthorization}
+                accessToken={accessToken}
+                chatState={chatState}
+                dispatch={dispatch}
+                setSelectedPlaylist={setSelectedPlaylist}
+                setPlaylistBarIsOpen={setPlaylistBarIsOpen}
+            />
             {userPlaylist && playlistBarIsOpen
-                ? <PlaylistBar userPlaylist={userPlaylist} setPlaylistBarIsOpen={setPlaylistBarIsOpen} />
+                ? <PlaylistBar
+                    spotifyAIPlaylist={spotifyAIPlaylist}
+                    setPlaylistBarIsOpen={setPlaylistBarIsOpen}
+                    selectedPlaylist={selectedPlaylist}
+                />
                 : null
             }
         </div>
