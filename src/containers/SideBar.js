@@ -1,37 +1,24 @@
 import React from 'react';
-import { Image, Tabs, Tab } from '@nextui-org/react';
-import { Link } from 'react-router-dom';
+import { Image, Tabs, Tab, Button } from '@nextui-org/react';
+import PlaylistItem from '../components/sidebar/PlaylistItem';
 
-function SideBar({ userPlaylist, filteredCreatedPlaylist, spotifyAIPlaylist }) {
+function SideBar({ userPlaylist, filteredCreatedPlaylist, spotifyAIPlaylist, setCurrentView, currentView }) {
     //turn playlist item into a component
     console.log(userPlaylist)
     return (
-        <div className="side-bar h-full w-[320px] overflow-auto pr-4">
-            <Link to='/'>
-                <div className='bg-[#121212] p-4 rounded-2xl'>
-                    Chat
-                </div>
-            </Link>
-            <Tabs className="w-full" aria-label="Tabs colors" radius="full">
-                <Tab key="photos" title="All">
+        <div className="side-bar h-full min-w-[300px] overflow-hidden pr-4 relative">
+            <Button className='bg-[#121212] w-full p-4 rounded-2xl mb-4' onClick={() => setCurrentView({
+                view: "chat",
+                playlistID: '',
+            })}>
+                Chat
+            </Button>
+            <Tabs fullWidth aria-label="Tabs colors" radius="full">
+                <Tab key="photos" title="All" className='h-full overflow-auto'>
                     {userPlaylist
                         ? (
                             userPlaylist.map((item) => (
-                                <Link to={`playlist/${item.id}`}>
-                                    <div key={item.id} className='flex gap-3 p-2 hover:bg-[#222326] rounded-lg'>
-                                        <Image
-                                            width={60}
-                                            className='min-w-[60px]'
-                                            alt="NextUI hero Image"
-                                            src={item.images.length > 0 ? item.images[0].url : null}
-                                        />
-                                        <div className='truncate flex flex-col justify-center'>
-                                            <p className='pb-2'>{item.name}</p>
-                                            <p className='text-sm text-slate-400'>{item.owner.display_name}</p>
-                                        </div>
-                                    </div>
-                                </Link>
-
+                                <PlaylistItem item={item} currentView={currentView} setCurrentView={setCurrentView} />
                             ))
                         ) : null
                     }
@@ -43,25 +30,16 @@ function SideBar({ userPlaylist, filteredCreatedPlaylist, spotifyAIPlaylist }) {
                     {spotifyAIPlaylist
                         ? (
                             spotifyAIPlaylist.map((item) => (
-                                <Link to={`playlist/${item.id}`}>
-                                    <div key={item.id} className='flex gap-3 p-2 hover:bg-[#222326] rounded-lg'>
-                                        <Image
-                                            width={52}
-                                            className='min-w-[52px]'
-                                            alt="NextUI hero Image"
-                                            src={item.images.length > 0 ? item.images[0].url : null}
-                                        />
-                                        <div className='truncate flex flex-col justify-center'>
-                                            <p className='text-sm pb-2'>{item.name}</p>
-                                            <p className='text-sm text-slate-400'>{item.owner.display_name}</p>
-                                        </div>
-                                    </div>
-                                </Link>
+                                <PlaylistItem item={item} currentView={currentView} setCurrentView={setCurrentView} />
                             ))
                         ) : null
                     }
                 </Tab>
             </Tabs>
+
+            <div className='absolute bottom-0 w-full bg-slate-500 z-1'>
+                <Button>Connect to Spotify</Button>
+            </div>
 
         </div >
     );
