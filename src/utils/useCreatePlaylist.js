@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 
 async function createPlaylist({ queryKey }) {
     const [playlistId, accessToken, playlistToAdd, setPlaylistToAdd, dispatch] = queryKey
-    const { playlist, selectedID } = playlistToAdd
+    const { playlist, selectedID, title, description } = playlistToAdd
     //gets user id
     const userResponse = await fetch('https://api.spotify.com/v1/me', {
         method: 'GET',
@@ -12,6 +12,8 @@ async function createPlaylist({ queryKey }) {
             'Content-Type': 'application/json',
         },
     }).then(res => res.json())
+
+    console.log(userResponse)
 
     const user_id = userResponse.id
 
@@ -22,8 +24,8 @@ async function createPlaylist({ queryKey }) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            name: 'SEBA AI',
-            description: 'A playlist created with the Spotify API',
+            name: title || 'SEBA',
+            description: description || 'A playlist created using CHAT GPT x Spotify API',
             public: false,
         }),
     }).then(res => res.json())

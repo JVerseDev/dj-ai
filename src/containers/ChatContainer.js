@@ -8,7 +8,7 @@ import useChatGPTResponse from '../utils/useChatGPTResponse';
 import useSpotify from '../utils/useSpotify';
 import useCreatePlaylist from '../utils/useCreatePlaylist';
 
-function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chatState, dispatch, setSelectedPlaylist, setPlaylistBarIsOpen }) {
+function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chatState, dispatch, setSelectedPlaylist, setPlaylistBarIsOpen, handleGetPlaylist }) {
     //state management
     const [sessionInput, setSessionInput] = React.useState('')
     const [gptPlaylist, setGPTPlaylist] = React.useState('')
@@ -27,6 +27,7 @@ function ChatContainer({ setSelectedSong, handleAuthorization, accessToken, chat
     //TODO: When setPlaylistToAdd state changes, refetch the user's collection of playlists
     const handleAddPlaylist = (playlistObj) => {
         setPlaylistToAdd(playlistObj)
+        handleGetPlaylist()
     }
 
     /* TODO: Add in recommendations from chat gpt onto spotify to create a mix */

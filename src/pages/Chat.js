@@ -29,6 +29,50 @@ function Chat() {
 
     React.useEffect(() => {
         //accessToken
+
+        console.log(`Access token is ${accessToken}`)
+        const prev_token = JSON.parse(localStorage.getItem("accessToken"))
+        console.log(prev_token)
+        const checkAccessTokenValidity = async (access_token) => {
+            try {
+                const response = await fetch('https://api.spotify.com/v1/me', {
+                    headers: {
+                        'Authorization': `Bearer ${access_token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    // Access token is still valid
+                    const userData = await response.json();
+                    console.log('User data:', userData);
+                    setAccessToken(access_token)
+                    return true;
+                } else {
+                    // Access token is invalid
+                    console.error('Invalid access token:', response.status, response.statusText);
+                    const response_refresh = await fetch(`http://localhost:3001/refresh/${prev_token.refresh_token}`)
+                    const new_access_token = await response_refresh.text()
+                    const new_data = {
+                        access_token: new_access_token,
+                        refresh_token: prev_token.refresh_token
+                    }
+                    setAccessToken(new_access_token)
+                    localStorage.setItem("accessToken", JSON.stringify(new_data))
+
+                    return false;
+                }
+            } catch (error) {
+                // An error occurred during the request
+                console.error('Error checking access token validity:', error);
+                return false;
+            }
+        };
+        checkAccessTokenValidity(prev_token.access_token);
+
+        //TODO: Put conditional logic here to check if user is still logged in (presense of access token in local storage, if not, then fetch using authorization code)
+        //if the user logs out, remove the access token out of local storage
+
+
         const urlParams = new URLSearchParams(window.location.search);
         const authorizationCode = urlParams.get('code');
         if (authorizationCode) {
@@ -37,6 +81,8 @@ function Chat() {
                 const data = await response.json()
                 //because of React.Strict mode, it's causing the data to return blank a second time. need conditional
                 if (!data.access_token) return
+
+                console.log(data)
 
                 setAccessToken(data.access_token)
                 localStorage.setItem("accessToken", JSON.stringify(data))
@@ -51,19 +97,20 @@ function Chat() {
     React.useEffect(() => {
         if (accessToken) {
             //put this into a useQuery hook
-            const handleGetPlaylists = async () => {
-                const userResponse = await fetch('https://api.spotify.com/v1/me/playlists', {
-                    method: 'GET',
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                }).then(res => res.json())
-                setUserPlaylist(userResponse)
-            }
             handleGetPlaylists()
         }
     }, [accessToken])
+
+    const handleGetPlaylists = async () => {
+        const userResponse = await fetch('https://api.spotify.com/v1/me/playlists', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+        }).then(res => res.json())
+        setUserPlaylist(userResponse)
+    }
 
 
     //where does spotify authorizaiton belong? Higher level parent?
@@ -76,10 +123,10 @@ function Chat() {
             scope,
             redirect_uri: redirectUri,
         })}`;
-        console.log(authorizationUrl)
         window.location = authorizationUrl;
     };
 
+    /*
     const toggleView = {
         chat: <ChatContainer
             setSelectedSong={setSelectedSong}
@@ -94,6 +141,7 @@ function Chat() {
             playlist={currentView.playlistID}
         />
     }
+    */
 
 
 
@@ -107,10 +155,23 @@ function Chat() {
                 spotifyAIPlaylist={spotifyAIPlaylist}
                 userPlaylist={userPlaylist.items}
                 filteredCreatedPlaylists={filteredCreatedPlaylists}
-                setCurrentView={setCurrentView}
-                currentView={currentView}
+                //setCurrentView={setCurrentView}
+                //currentView={currentView}
+                setSelectedPlaylist={setSelectedPlaylist}
+                setPlaylistBarIsOpen={setPlaylistBarIsOpen}
+                selectedPlaylist={selectedPlaylist}
+                accessToken={accessToken}
             />
-            {toggleView[currentView.view]}
+            <ChatContainer
+                setSelectedSong={setSelectedSong}
+                handleAuthorization={handleAuthorization}
+                accessToken={accessToken}
+                chatState={chatState}
+                dispatch={dispatch}
+                setSelectedPlaylist={setSelectedPlaylist}
+                setPlaylistBarIsOpen={setPlaylistBarIsOpen}
+                handleGetPlaylists={handleGetPlaylists}
+            />
             {userPlaylist && playlistBarIsOpen
                 ? <PlaylistBar
                     spotifyAIPlaylist={spotifyAIPlaylist}

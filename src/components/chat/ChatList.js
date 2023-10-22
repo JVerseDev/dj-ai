@@ -3,6 +3,7 @@ import AIChatItem from './AIChatItem';
 import './animation.css'
 import { Button } from '@nextui-org/react';
 import CreatePlaylist from './CreatePlaylist';
+import { Waveform } from '@uiball/loaders'
 
 function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAuthorization, handleAddPlaylist, accessToken, setSelectedPlaylist, setPlaylistBarIsOpen }) {
     //create a hook for this? take in an array and return an array
@@ -32,7 +33,16 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
                         ? null
                         : <div className={`w-[640px] p-4 bg-[#242424] mt-8 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
                             {gptQuery.isLoading && chatItem.seba.message === ''
-                                ? <p>Your Personal DJ at Work....</p>
+                                ? <div className='flex'>
+                                    <p>Your Personal DJ at Work &#160;</p>
+                                    <Waveform
+                                        size={24}
+                                        lineWeight={3}
+                                        speed={1}
+                                        color="white"
+                                        className="ml-4"
+                                    />
+                                </div>
                                 : chatItem.seba.message
                             }
                         </div>
@@ -42,20 +52,6 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
                         <div className={`w-[640px] p-4 bg-[#242424] mt-4 rounded-3xl ${index === chatState.length - 1 && 'animated-seba-component'}`}>
                             {accessToken
                                 ? <div>
-
-                                    <CreatePlaylist>
-                                        <Button
-                                            color='primary'
-                                            isDisabled={chatItem.playlistID ? true : false}
-                                            onClick={() => handleAddPlaylist(
-                                                {
-                                                    playlist: chatItem.seba.spotify.map(song => song.uri),
-                                                    selectedID: chatItem.id
-                                                }
-                                            )}>
-                                            {chatItem.playlistID ? 'Playlist Added ✓' : 'Add to Playlist'}
-                                        </Button>
-                                    </CreatePlaylist>
                                     {chatItem.playlistID
                                         ? <Button
                                             onClick={() => {
@@ -65,7 +61,7 @@ function ChatList({ chatState, gptQuery, spotifyQuery, setSelectedSong, handleAu
                                         >
                                             View Playlist
                                         </Button>
-                                        : null}
+                                        : <CreatePlaylist chatItem={chatItem} handleAddPlaylist={handleAddPlaylist} />}
 
                                 </div>
                                 : <Button

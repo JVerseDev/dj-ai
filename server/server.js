@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors'); // Import the 'cors' package
 const querystring = require('querystring');
@@ -9,12 +10,20 @@ const port = 3001;
 // Enable CORS for all routes
 app.use(cors());
 
-const clientId = '6b42d12ccbbe4a67837f46ba132701db';
-const clientSecret = '73ff00832bd24ff1af4b56f605721e66';
+const clientId = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
 const redirectUri = 'http://localhost:3001/callback';
 
 const apiUrl = 'https://api.spotify.com/v1';
 const createPlaylistUrl = `${apiUrl}/me/playlists`;
+
+
+app.get('/refresh/:refresh_token', async (req, res) => {
+    const refresh_t = req.params.refresh_token
+    console.log("refresh fired")
+    const new_access_token = await refreshAccessToken(refresh_t)
+    res.send(new_access_token)
+});
 
 app.get('/callback', async (req, res) => {
     //req.params.id /:id
@@ -55,9 +64,9 @@ async function requestAccessToken(code) {
     return result
 }
 
-const refreshAccessToken = (refreshToken) => {
+async function refreshAccessToken(refreshToken) {
     // Make a POST request to the token endpoint of the authorization server
-    const result = fetch('https://api.example.com/token', {
+    const result = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -74,7 +83,8 @@ const refreshAccessToken = (refreshToken) => {
             // The response should contain a new access token
             const newAccessToken = data.access_token;
             // You can use the new access token to make authenticated API requests
-            console.log('New Access Token:', newAccessToken);
+            //console.log('New Access Token:', newAccessToken);
+            return data.access_token
         })
         .catch((error) => {
             console.error('Error refreshing access token:', error);
